@@ -68,6 +68,9 @@ namespace SpriteProcess
 
         private void cmdConvert_Click(object sender, EventArgs e)
         {
+            int outWid = (int)nudWidth.Value;
+            int outHei = (int)nudHeight.Value;
+
             prgProgress.Value = 0;
             prgProgress.Maximum = lstSourceFiles.Items.Count;
 
@@ -116,8 +119,12 @@ namespace SpriteProcess
                 Color alphaPx = pbAlpha.BackColor;
                 Color shadowPx = pbShadow.BackColor;
                 
-                Bitmap sprite = new Bitmap(source.Width, source.Height);
-                Bitmap shadow = new Bitmap(source.Width, source.Height);
+                Bitmap sprite = new Bitmap(outWid, outHei);
+                Bitmap shadow = new Bitmap(outWid, outHei);
+                int offsetX = (outWid - source.Width) / 2;
+                int offsetY = (outHei - source.Height) / 2;
+                offsetX = Math.Max(offsetX, 0);
+                offsetY = Math.Max(offsetY, 0);
                 using (Graphics g = Graphics.FromImage(sprite))
                 {
                     g.Clear(Color.Transparent);
@@ -127,18 +134,18 @@ namespace SpriteProcess
                     g.Clear(Color.Transparent);
                 }
 
-                for (int y = 0; y < source.Height; y++)
+                for (int y = 0; y < Math.Min(outHei, source.Height); y++)
                 {
-                    for (int x = 0; x < source.Width; x++)
+                    for (int x = 0; x < Math.Min(outWid, source.Width); x++)
                     {
                         Color srcPx = source.GetPixel(x, y);
                         if (ColorEq(srcPx, shadowPx))
                         {
-                            shadow.SetPixel(x, y, srcPx);
+                            shadow.SetPixel(x + offsetX, y + offsetY, srcPx);
                         }
                         else if (!ColorEq(srcPx, alphaPx))
                         {
-                            sprite.SetPixel(x, y, srcPx);
+                            sprite.SetPixel(x + offsetX, y + offsetY, srcPx);
                         }
                     }
                 }
